@@ -30,6 +30,8 @@ $ oc apply -f minio-tenant.yaml
 ```
 oc project openshift-logging
 
+$ oc apply -f clusterlogging.yaml
+
 $ oc create secret generic loki-bucket \
     --from-literal=region=ap-northeast-1 \
     --from-literal=bucketnames=loki-bucket \
@@ -38,7 +40,7 @@ $ oc create secret generic loki-bucket \
     --from-literal=endpoint=minio.logging-test.svc.cluster.local \
     -n openshift-logging
 
-$ oc apply -f lokistack-gateway.
+$ oc apply -f lokistack-gateway.yaml
 
 $ oc -n openshift-logging create secret generic lokistack-gateway-bearer-token \
     --from-literal=token="/var/run/secrets/kubernetes.io/serviceaccount/token" \
@@ -47,4 +49,24 @@ $ oc -n openshift-logging create secret generic lokistack-gateway-bearer-token \
 $ oc apply -f rbac.yaml
 
 $ oc apply -f clusterlogforwarder.yaml
+```
+
+## Cleanup
+
+```
+$ oc project openshift-logging
+$ oc delete -f clusterlogforwarder.yaml
+$ oc delete -f rbac.yaml
+$ oc delete secret lokistack-gateway-bearer-token
+$ oc delete -f lokistack-gateway.yaml
+$ oc delete secret loki-bucket
+$ oc delete -f clusterlogging.yaml
+
+$ oc project logging-test
+$ oc delete -f minio-tenant.yaml
+$ oc adm policy remove-scc-from-user nonroot -z minio
+$ oc delete sa minio
+$ oc delete secret console-secret
+$ oc delete secret minio-creds-secret 
+$ oc delete project logging-test
 ```
