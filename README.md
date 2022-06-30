@@ -1,4 +1,7 @@
 # ocp-logging-test-based-loki-vector
+
+[![Contribute](https://www.eclipse.org/che/contribute.svg)](https://codeready-codeready-workspaces-operator.apps.sandbox-m2.ll9k.p1.openshiftapps.com/#https://github.com/k-srkw/ocp-logging-test-based-loki-vector.git)
+
 OpenShift Logging Test based on Loki and Vector
 
 ```
