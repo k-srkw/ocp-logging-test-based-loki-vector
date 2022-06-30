@@ -1,0 +1,30 @@
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: logging-test
+spec:
+  serviceAccountName: minio
+  requestAutoCert: false
+  credsSecret:
+    name: minio-creds-secret
+  users:
+  - name: console-secret
+  pools:
+  - servers: 4
+    volumesPerServer: 4
+    volumeClaimTemplate:
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 20Gi
+  buckets:
+  - name: loki-bucket
+    region: ap-northeast-1
+    objectLock: false
+
