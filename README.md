@@ -25,31 +25,33 @@ $ oc adm policy add-scc-to-user nonroot -z minio
 $ oc apply -f minio-tenant.yaml
 ```
 
-## [Deploy Loki](https://github.com/grafana/loki/tree/main/operator)
+## [Deploy Loki with Gateway](https://github.com/grafana/loki/tree/main/operator)
 
 ```
 oc project openshift-logging
 
 $ oc apply -f clusterlogging.yaml
 
+or
+
+$ oc apply -f clusterlogging-vector.yaml
+
 $ oc create secret generic loki-bucket \
-    --from-literal=region=ap-northeast-1 \
-    --from-literal=bucketnames=loki-bucket \
-    --from-literal=access_key_id=admin \
-    --from-literal=access_key_secret=adminadmin \
-    --from-literal=endpoint=minio.logging-test.svc.cluster.local \
+    --from-literal=region=<region_name> \
+    --from-literal=bucketnames=<bucket_name> \
+    --from-literal=access_key_id=<access_key_name> \
+    --from-literal=access_key_secret=<secret_name> \
+    --from-literal=endpoint=<endpoint_url> \
     -n openshift-logging
 
 $ oc apply -f lokistack-gateway.yaml
-
-$ oc -n openshift-logging create secret generic lokistack-gateway-bearer-token \
-    --from-literal=token="/var/run/secrets/kubernetes.io/serviceaccount/token" \
-    --from-literal=ca-bundle.crt="$(oc get cm lokistack-dev-gateway-ca-bundle -o json | jq -r '.data."service-ca.crt"')"
 
 $ oc apply -f rbac.yaml
 
 $ oc apply -f clusterlogforwarder.yaml
 ```
+
+Gateway が TLS に対応していない。 TLS 接続の Secret で Token を入れているが、多分 HTTP だと認識されず、入れる場所がない。
 
 ## Cleanup
 
@@ -69,4 +71,15 @@ $ oc delete sa minio
 $ oc delete secret console-secret
 $ oc delete secret minio-creds-secret 
 $ oc delete project logging-test
+```
+
+# debug
+
+```
+curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/labels"
+
+$ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query" --data-urlencode 'query={log_type="application"}' | jq
+$ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query_range" --data-urlencode 'query={log_type="application"}' --data-urlencode 'step=5s' | jq
+$ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query_range" --data-urlencode 'query={log_type="infra"}' --data-urlencode 'step=5s' | jq
+$ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query" --data-urlencode 'query={log_type="audit"}' | jq
 ```
