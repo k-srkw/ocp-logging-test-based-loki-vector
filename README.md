@@ -51,7 +51,7 @@ $ oc apply -f rbac.yaml
 $ oc apply -f clusterlogforwarder.yaml
 ```
 
-Gateway が TLS に対応していない。 TLS 接続の Secret で Token を入れているが、多分 HTTP だと認識されず、入れる場所がない。
+Gateway が TLS に対応していない。 TLS 接続の Secret で Token を入れていれても多分 HTTP だと認識されない。
 
 ## Cleanup
 
@@ -76,7 +76,7 @@ $ oc delete project logging-test
 # debug
 
 ```
-curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/labels"
+$ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/labels"
 
 $ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query" --data-urlencode 'query={log_type="application"}' | jq
 $ curl -H "Authorization: Bearer sha256~<token>" -G -s  "http://lokistack-dev-gateway-http.openshift-logging.svc:8080/api/logs/v1/application/loki/api/v1/query_range" --data-urlencode 'query={log_type="application"}' --data-urlencode 'step=5s' | jq
