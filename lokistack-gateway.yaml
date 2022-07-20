@@ -7,7 +7,7 @@ spec:
   size: 1x.extra-small
   storage:
     secret:
-      name: loki-bucket
+      name: lokistack-dev-minio
       type: s3
   storageClassName: gp2
   tenants:

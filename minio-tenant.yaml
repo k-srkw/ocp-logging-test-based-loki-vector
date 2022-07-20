@@ -2,7 +2,7 @@ apiVersion: minio.min.io/v2
 kind: Tenant
 metadata:
   name: minio
-  namespace: logging-test
+  namespace: logging-storage
 spec:
   serviceAccountName: minio
   requestAutoCert: false
